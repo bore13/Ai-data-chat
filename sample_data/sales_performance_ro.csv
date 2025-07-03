@@ -1,0 +1,17 @@
+Date,Region,City,Product_Name,Product_Category,Therapeutic_Area,Sales_Rep,Doctor_Name,Hospital_Clinic,Units_Sold,Revenue_LEI,Cost_LEI,Profit_LEI,Profit_Margin,Market_Share,Competitor_Products,Prescription_Count,Patient_Count,Insurance_Coverage,Discount_Rate,Sales_Channel,Quarter,Year
+2024-01-15,București,București,CardioMax,Prescription,Cardiovascular,Ion Popescu,Dr. Maria Dumitrescu,Spitalul Universitar de Urgență București,150,45000,31500,13500,30.0%,12.5%,CardioPlus,CardioSafe,180,165,85%,5%,Direct,1,2024
+2024-01-16,Cluj,Cluj-Napoca,NeuroVent,Prescription,Neurology,Elena Ionescu,Dr. Alexandru Vasilescu,Spitalul Universitar de Urgență Cluj-Napoca,89,35600,24920,10680,30.0%,8.2%,NeuroCare,NeuroFlex,95,87,90%,3%,Direct,1,2024
+2024-01-17,Timiș,Timișoara,ImmunoBoost,Prescription,Immunology,Mihai Marin,Dr. Cristina Stoica,Spitalul Clinic Județean Timișoara,234,70200,49140,21060,30.0%,15.3%,ImmunoMax,ImmunoCare,245,220,80%,7%,Direct,1,2024
+2024-01-18,Iași,Iași,OncoTarget,Prescription,Oncology,Ana Georgescu,Dr. Radu Lupu,Spitalul Universitar de Urgență Iași,67,20100,14070,6030,30.0%,6.8%,OncoCare,OncoMax,72,65,95%,2%,Direct,1,2024
+2024-01-19,Constanța,Constanța,RespiraMax,Prescription,Respiratory,Victor Dobre,Dr. Laura Popa,Spitalul Clinic Județean Constanța,123,36900,25830,11070,30.0%,9.1%,RespiraCare,RespiraFlex,135,118,75%,4%,Direct,1,2024
+2024-01-20,Brașov,Brașov,EndoCare,Prescription,Endocrinology,Cristina Munteanu,Dr. Ion Vasile,Spitalul Clinic Județean Brașov,178,53400,37380,16020,30.0%,11.2%,EndoMax,EndoSafe,185,170,88%,6%,Direct,1,2024
+2024-01-21,Sibiu,Sibiu,DermaCure,Prescription,Dermatology,Radu Stoica,Dr. Elena Marin,Spitalul Clinic Județean Sibiu,156,46800,32760,14040,30.0%,10.8%,DermaCare,DermaFlex,162,145,82%,5%,Direct,1,2024
+2024-01-22,Craiova,Craiova,PsychoMed,Prescription,Psychiatry,Laura Dumitrescu,Dr. Mihai Ionescu,Spitalul Clinic Județean Craiova,98,29400,20580,8820,30.0%,7.5%,PsychoCare,PsychoMax,105,92,90%,3%,Direct,1,2024
+2024-01-23,Galați,Galați,GastroHeal,Prescription,Gastroenterology,Alexandru Popa,Dr. Ana Vasile,Spitalul Clinic Județean Galați,134,40200,28140,12060,30.0%,8.9%,GastroCare,GastroMax,142,128,85%,4%,Direct,1,2024
+2024-01-24,Ploiești,Ploiești,VitaBoost,OTC,Vitamins,Marin Ionescu,Dr. Victor Dumitrescu,Farmacia Centrală Ploiești,456,22800,15960,6840,30.0%,18.5%,VitaCare,VitaMax,0,456,0%,15%,Retail,1,2024
+2024-01-25,Bacău,Bacău,PainRelief,OTC,Analgesics,Elena Vasile,Dr. Cristina Popa,Farmacia Sanitas Bacău,789,39450,27615,11835,30.0%,22.3%,PainCare,PainMax,0,789,0%,12%,Retail,1,2024
+2024-01-26,Pitești,Pitești,ColdCare,OTC,Cold & Flu,Mihai Lupu,Dr. Radu Stoica,Farmacia Medica Pitești,567,28350,19845,8505,30.0%,16.8%,ColdMax,ColdFlex,0,567,0%,10%,Retail,1,2024
+2024-01-27,Brăila,Brăila,AllergyMax,OTC,Allergy,Ana Marin,Dr. Laura Georgescu,Farmacia Pharma Brăila,345,17250,12075,5175,30.0%,14.2%,AllergyCare,AllergyFlex,0,345,0%,8%,Retail,1,2024
+2024-01-28,Oradea,Oradea,SleepAid,OTC,Sleep,Victor Dobre,Dr. Alexandru Munteanu,Farmacia Vita Oradea,234,11700,8190,3510,30.0%,11.5%,SleepCare,SleepMax,0,234,0%,9%,Retail,1,2024
+2024-01-29,Arad,Arad,DigestAid,OTC,Digestive Health,Cristina Stoica,Dr. Ion Dumitrescu,Farmacia Digest Arad,456,22800,15960,6840,30.0%,19.2%,DigestCare,DigestMax,0,456,0%,11%,Retail,1,2024
+2024-01-30,Sibiu,Sibiu,SkinCare,OTC,Skin Care,Radu Vasile,Dr. Elena Popa,Farmacia Beauty Sibiu,678,33900,23730,10170,30.0%,25.1%,SkinMax,SkinFlex,0,678,0%,13%,Retail,1,2024 

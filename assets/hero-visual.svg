@@ -1,0 +1,12 @@
+<svg width="600" height="220" viewBox="0 0 600 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="600" height="220" rx="32" fill="#F0F2F5"/>
+  <rect x="40" y="40" width="520" height="60" rx="16" fill="#1A2B42" fill-opacity="0.08"/>
+  <rect x="40" y="120" width="320" height="40" rx="12" fill="#4CAF50" fill-opacity="0.12"/>
+  <rect x="380" y="120" width="180" height="40" rx="12" fill="#1A2B42" fill-opacity="0.12"/>
+  <circle cx="80" cy="70" r="12" fill="#4CAF50"/>
+  <rect x="110" y="60" width="120" height="20" rx="8" fill="#1A2B42" fill-opacity="0.12"/>
+  <rect x="250" y="60" width="80" height="20" rx="8" fill="#4CAF50" fill-opacity="0.18"/>
+  <rect x="350" y="60" width="120" height="20" rx="8" fill="#1A2B42" fill-opacity="0.08"/>
+  <rect x="490" y="60" width="50" height="20" rx="8" fill="#4CAF50" fill-opacity="0.18"/>
+  <text x="50%" y="200" text-anchor="middle" fill="#1A2B42" font-size="20" font-family="Lato, Inter, sans-serif" opacity="0.3">AI Chat + Visuals</text>
+</svg> 
