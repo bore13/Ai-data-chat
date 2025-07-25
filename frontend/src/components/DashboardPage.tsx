@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { aiService } from '../lib/ai'
+import { ChatEncryption } from '../lib/encryption'
 import { User } from '../types'
-import { Send, Database, LogOut, MessageSquare, BarChart3, TrendingUp, Lightbulb, Trash2 } from 'lucide-react'
+import { Send, Database, LogOut, MessageSquare, BarChart3, TrendingUp, Lightbulb, Trash2, Shield } from 'lucide-react'
+import PrivacyNotice from './PrivacyNotice'
 
 interface DashboardPageProps {
   user: User
@@ -22,6 +24,7 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
     reformulated_query?: string,
     metrics?: Record<string, string>
   }>>([])
+  const [showPrivacyNotice, setShowPrivacyNotice] = useState(false)
   const navigate = useNavigate()
 
   // Load chat history on component mount
@@ -40,16 +43,23 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
       if (error) throw error
 
       if (data) {
-        const formattedMessages = data.map(msg => ({
-          id: msg.id,
-          text: msg.message_text,
-          isUser: msg.is_user_message,
-          timestamp: new Date(msg.timestamp),
-          insights: msg.insights || [],
-          recommendations: msg.recommendations || [],
-          reformulated_query: msg.reformulated_query,
-          metrics: msg.metrics || {}
-        }))
+        const formattedMessages = await Promise.all(
+          data.map(async (msg) => {
+            // Decrypt message text
+            const decryptedText = await ChatEncryption.decryptMessage(msg.message_text, user.id)
+            
+            return {
+              id: msg.id,
+              text: decryptedText,
+              isUser: msg.is_user_message,
+              timestamp: new Date(msg.timestamp),
+              insights: msg.insights || [],
+              recommendations: msg.recommendations || [],
+              reformulated_query: msg.reformulated_query,
+              metrics: msg.metrics || {}
+            }
+          })
+        )
         setMessages(formattedMessages)
       }
     } catch (error) {
@@ -59,11 +69,14 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
 
   const saveMessageToHistory = async (message: any) => {
     try {
+      // Encrypt message text before storing
+      const encryptedText = await ChatEncryption.encryptMessage(message.text, user.id)
+      
       const { error } = await supabase
         .from('chat_history')
         .insert({
           user_id: user.id,
-          message_text: message.text,
+          message_text: encryptedText,
           is_user_message: message.isUser,
           timestamp: message.timestamp,
           insights: message.insights,
@@ -161,6 +174,14 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">Welcome, {user.email}</span>
+              <button
+                onClick={() => setShowPrivacyNotice(true)}
+                className="flex items-center text-green-600 text-xs hover:text-green-700"
+                title="Learn about privacy & security"
+              >
+                <Shield className="h-3 w-3 mr-1" />
+                End-to-End Encrypted
+              </button>
               <button
                 onClick={clearChatHistory}
                 className="btn-secondary flex items-center text-red-600 hover:text-red-700"
@@ -372,6 +393,12 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
           </div>
         </div>
       </main>
+
+      {/* Privacy Notice Modal */}
+      <PrivacyNotice 
+        isOpen={showPrivacyNotice} 
+        onClose={() => setShowPrivacyNotice(false)} 
+      />
     </div>
   )
 }
