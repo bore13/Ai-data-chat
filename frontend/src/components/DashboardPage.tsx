@@ -4,8 +4,9 @@ import { supabase } from '../lib/supabase'
 import { aiService } from '../lib/ai'
 import { ChatEncryption } from '../lib/encryption'
 import { User } from '../types'
-import { Send, Database, LogOut, MessageSquare, BarChart3, TrendingUp, Lightbulb, Trash2, Shield } from 'lucide-react'
+import { Send, Database, LogOut, MessageSquare, BarChart3, TrendingUp, Lightbulb, Trash2, Shield, Plus } from 'lucide-react'
 import PrivacyNotice from './PrivacyNotice'
+import ChatSessions from './ChatSessions'
 
 interface DashboardPageProps {
   user: User
@@ -24,20 +25,26 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
     reformulated_query?: string,
     metrics?: Record<string, string>
   }>>([])
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [showPrivacyNotice, setShowPrivacyNotice] = useState(false)
+  const [showSessions, setShowSessions] = useState(false)
   const navigate = useNavigate()
 
-  // Load chat history on component mount
+  // Load chat history when session changes
   useEffect(() => {
-    loadChatHistory()
-  }, [])
+    if (currentSessionId) {
+      loadChatHistory(currentSessionId)
+    }
+  }, [currentSessionId])
 
-  const loadChatHistory = async () => {
+  const loadChatHistory = async (sessionId?: string) => {
+    if (!sessionId) return
+    
     try {
       const { data, error } = await supabase
         .from('chat_history')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('session_id', sessionId)
         .order('timestamp', { ascending: true })
 
       if (error) throw error
@@ -61,6 +68,8 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
           })
         )
         setMessages(formattedMessages)
+      } else {
+        setMessages([])
       }
     } catch (error) {
       console.error('Error loading chat history:', error)
@@ -68,6 +77,8 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
   }
 
   const saveMessageToHistory = async (message: any) => {
+    if (!currentSessionId) return
+    
     try {
       // Encrypt message text before storing
       const encryptedText = await ChatEncryption.encryptMessage(message.text, user.id)
@@ -76,6 +87,7 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
         .from('chat_history')
         .insert({
           user_id: user.id,
+          session_id: currentSessionId,
           message_text: encryptedText,
           is_user_message: message.isUser,
           timestamp: message.timestamp,
@@ -91,14 +103,25 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
     }
   }
 
+  const handleSessionSelect = (sessionId: string) => {
+    setCurrentSessionId(sessionId)
+    setShowSessions(false)
+  }
+
+  const handleNewSession = () => {
+    setCurrentSessionId(null)
+    setMessages([])
+    setShowSessions(false)
+  }
+
   const clearChatHistory = async () => {
-    if (!confirm('Are you sure you want to clear all chat history?')) return
+    if (!currentSessionId || !confirm('Are you sure you want to clear this conversation?')) return
 
     try {
       const { error } = await supabase
         .from('chat_history')
         .delete()
-        .eq('user_id', user.id)
+        .eq('session_id', currentSessionId)
 
       if (error) throw error
       setMessages([])
@@ -175,6 +198,14 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">Welcome, {user.email}</span>
               <button
+                onClick={() => setShowSessions(!showSessions)}
+                className="btn-secondary flex items-center"
+                title="Manage conversations"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Conversations
+              </button>
+              <button
                 onClick={() => setShowPrivacyNotice(true)}
                 className="flex items-center text-green-600 text-xs hover:text-green-700"
                 title="Learn about privacy & security"
@@ -185,7 +216,7 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
               <button
                 onClick={clearChatHistory}
                 className="btn-secondary flex items-center text-red-600 hover:text-red-700"
-                title="Clear chat history"
+                title="Clear current conversation"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Clear Chat
@@ -211,9 +242,24 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sessions Sidebar */}
+          {showSessions && (
+            <div className="lg:col-span-1">
+              <div className="card">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Conversations</h3>
+                <ChatSessions
+                  user={user}
+                  currentSessionId={currentSessionId}
+                  onSessionSelect={handleSessionSelect}
+                  onNewSession={handleNewSession}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Chat Section */}
-          <div className="lg:col-span-2">
+          <div className={`${showSessions ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
             <div className="card">
               <div className="flex items-center mb-6">
                 <MessageSquare className="h-6 w-6 text-primary-600 mr-2" />
