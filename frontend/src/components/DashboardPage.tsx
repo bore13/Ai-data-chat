@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { aiService } from '../lib/ai'
 import { User } from '../types'
-import { Send, Database, LogOut, MessageSquare, BarChart3, TrendingUp, Lightbulb } from 'lucide-react'
+import { Send, Database, LogOut, MessageSquare, BarChart3, TrendingUp, Lightbulb, Trash2 } from 'lucide-react'
 
 interface DashboardPageProps {
   user: User
@@ -24,6 +24,76 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
   }>>([])
   const navigate = useNavigate()
 
+  // Load chat history on component mount
+  useEffect(() => {
+    loadChatHistory()
+  }, [])
+
+  const loadChatHistory = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('chat_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('timestamp', { ascending: true })
+
+      if (error) throw error
+
+      if (data) {
+        const formattedMessages = data.map(msg => ({
+          id: msg.id,
+          text: msg.message_text,
+          isUser: msg.is_user_message,
+          timestamp: new Date(msg.timestamp),
+          insights: msg.insights || [],
+          recommendations: msg.recommendations || [],
+          reformulated_query: msg.reformulated_query,
+          metrics: msg.metrics || {}
+        }))
+        setMessages(formattedMessages)
+      }
+    } catch (error) {
+      console.error('Error loading chat history:', error)
+    }
+  }
+
+  const saveMessageToHistory = async (message: any) => {
+    try {
+      const { error } = await supabase
+        .from('chat_history')
+        .insert({
+          user_id: user.id,
+          message_text: message.text,
+          is_user_message: message.isUser,
+          timestamp: message.timestamp,
+          insights: message.insights,
+          recommendations: message.recommendations,
+          reformulated_query: message.reformulated_query,
+          metrics: message.metrics
+        })
+
+      if (error) throw error
+    } catch (error) {
+      console.error('Error saving message to history:', error)
+    }
+  }
+
+  const clearChatHistory = async () => {
+    if (!confirm('Are you sure you want to clear all chat history?')) return
+
+    try {
+      const { error } = await supabase
+        .from('chat_history')
+        .delete()
+        .eq('user_id', user.id)
+
+      if (error) throw error
+      setMessages([])
+    } catch (error) {
+      console.error('Error clearing chat history:', error)
+    }
+  }
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     navigate('/login')
@@ -41,6 +111,7 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
     }
 
     setMessages(prev => [...prev, userMessage])
+    await saveMessageToHistory(userMessage)
     setLoading(true)
 
     try {
@@ -59,6 +130,7 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
       }
 
       setMessages(prev => [...prev, aiMessage])
+      await saveMessageToHistory(aiMessage)
     } catch (error) {
       console.error('AI analysis error:', error)
       const errorMessage = {
@@ -68,6 +140,7 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
         timestamp: new Date()
       }
       setMessages(prev => [...prev, errorMessage])
+      await saveMessageToHistory(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -88,6 +161,14 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">Welcome, {user.email}</span>
+              <button
+                onClick={clearChatHistory}
+                className="btn-secondary flex items-center text-red-600 hover:text-red-700"
+                title="Clear chat history"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear Chat
+              </button>
               <button
                 onClick={() => navigate('/data-sources')}
                 className="btn-secondary flex items-center"
