@@ -24,14 +24,14 @@ class AIService {
     this.baseUrl = 'https://api.openai.com/v1'
   }
 
-  async analyzeData(userId: string, userMessage: string): Promise<AIResponse> {
+  async analyzeData(userId: string, userMessage: string, selectedDatasets?: string[]): Promise<AIResponse> {
     try {
       // Only use real AI - no fallbacks
       if (!this.apiKey) {
         throw new Error('OpenAI API key not configured')
       }
 
-      return await this.fallbackAnalysis(userId, userMessage)
+      return await this.fallbackAnalysis(userId, userMessage, selectedDatasets)
     } catch (error) {
       console.error('AI analysis error:', error)
       throw error
@@ -40,25 +40,48 @@ class AIService {
 
 
 
-  private async fallbackAnalysis(userId: string, userMessage: string): Promise<AIResponse> {
+  private async fallbackAnalysis(userId: string, userMessage: string, selectedDatasets?: string[]): Promise<AIResponse> {
     try {
-      // 1. Fetch user's data sources and CSV data
-      const { data: dataSources, error: sourcesError } = await supabase
+      console.log('🔍 Fetching data for user:', userId)
+      console.log('📊 Selected datasets:', selectedDatasets)
+      
+      // 1. Fetch user's data sources with their uploaded CSV data
+      let query = supabase
         .from('data_sources')
         .select(`
-          *,
-          uploaded_csv_data (*)
+          id,
+          name,
+          type,
+          uploaded_csv_data (
+            id,
+            original_filename,
+            data_json
+          )
         `)
         .eq('user_id', userId)
+        .eq('type', 'csv')
+
+      // Filter by selected datasets if specified
+      if (selectedDatasets && selectedDatasets.length > 0 && !selectedDatasets.includes('all')) {
+        query = query.in('id', selectedDatasets)
+      }
+
+      const { data: dataSources, error: sourcesError } = await query
 
       if (sourcesError) throw sourcesError
 
+      console.log('📊 Found data sources:', dataSources?.length || 0)
+      console.log('📄 Data sources:', dataSources)
+
       // 2. Prepare context from CSV data
       const csvData = dataSources?.flatMap(ds => ds.uploaded_csv_data) || []
+      console.log('📈 CSV data entries:', csvData.length)
+      console.log('📋 CSV data:', csvData)
+      
       const dataContext = this.prepareDataContext(csvData)
 
-      // 3. Create AI prompt with data context
-      const prompt = this.createAnalysisPrompt(userMessage, dataContext)
+      // 3. Create AI prompt with data context and selected datasets info
+      const prompt = this.createAnalysisPrompt(userMessage, dataContext, selectedDatasets)
 
       // 4. Call AI service
       const response = await this.callAI(prompt)
@@ -76,25 +99,39 @@ class AIService {
   }
 
   private prepareDataContext(csvData: any[]): string {
+    console.log('🔧 Preparing data context for', csvData.length, 'CSV entries')
+    
     if (!csvData.length) {
+      console.log('❌ No CSV data available')
       return "No CSV data available for analysis."
     }
 
     let context = "Available data sources:\n"
     
     csvData.forEach((data, index) => {
+      console.log(`📁 Processing dataset ${index + 1}:`, data.original_filename)
+      console.log('📊 Data structure:', data)
+      
       const sampleData = data.data_json?.slice(0, 3) || []
       const columns = Object.keys(sampleData[0] || {})
+      
+      console.log('📋 Columns found:', columns)
+      console.log('📄 Sample data:', sampleData)
       
       context += `\nDataset ${index + 1}: ${data.original_filename}\n`
       context += `Columns: ${columns.join(', ')}\n`
       context += `Sample data:\n${JSON.stringify(sampleData, null, 2)}\n`
     })
 
+    console.log('📝 Final context length:', context.length)
     return context
   }
 
-  private createAnalysisPrompt(userMessage: string, dataContext: string): string {
+  private createAnalysisPrompt(userMessage: string, dataContext: string, selectedDatasets?: string[]): string {
+    const datasetInfo = selectedDatasets && selectedDatasets.length > 0 
+      ? `\nSelected Datasets: The user has selected specific datasets for analysis. Focus your analysis on these datasets only.`
+      : `\nNote: The user has not selected specific datasets, so analyze all available data.`
+
     return `You are an expert data analyst. Your role is to:
 
 1. INTELLIGENTLY REFORMULATE the user's question into a precise, professional data analysis query
@@ -102,7 +139,7 @@ class AIService {
 3. PROVIDE actionable insights with concrete data points
 
 Data Context:
-${dataContext}
+${dataContext}${datasetInfo}
 
 User Question: ${userMessage}
 

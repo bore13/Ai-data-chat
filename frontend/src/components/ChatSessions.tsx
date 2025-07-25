@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { User } from '../types'
-import { MessageSquare, Plus, Trash2, Edit3, MoreVertical } from 'lucide-react'
+import { MessageSquare, Plus, Trash2, Edit3 } from 'lucide-react'
 
 interface ChatSession {
   id: string
@@ -14,10 +14,9 @@ interface ChatSessionsProps {
   user: User
   currentSessionId: string | null
   onSessionSelect: (sessionId: string) => void
-  onNewSession: () => void
 }
 
-const ChatSessions = ({ user, currentSessionId, onSessionSelect, onNewSession }: ChatSessionsProps) => {
+const ChatSessions = ({ user, currentSessionId, onSessionSelect }: ChatSessionsProps) => {
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [loading, setLoading] = useState(true)
   const [editingSession, setEditingSession] = useState<string | null>(null)
@@ -59,6 +58,9 @@ const ChatSessions = ({ user, currentSessionId, onSessionSelect, onNewSession }:
       
       setSessions(prev => [data, ...prev])
       onSessionSelect(data.id)
+      
+      // Refresh the sessions list
+      await loadSessions()
     } catch (error) {
       console.error('Error creating session:', error)
     }
@@ -133,10 +135,11 @@ const ChatSessions = ({ user, currentSessionId, onSessionSelect, onNewSession }:
       {/* New Chat Button */}
       <button
         onClick={createNewSession}
-        className="w-full btn-primary flex items-center justify-center"
+        className="w-full btn-primary flex items-center justify-center text-sm sm:text-base"
       >
-        <Plus className="h-4 w-4 mr-2" />
-        New Chat
+        <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+        <span className="hidden sm:inline">New Chat</span>
+        <span className="sm:hidden">New</span>
       </button>
 
       {/* Sessions List */}
@@ -144,14 +147,14 @@ const ChatSessions = ({ user, currentSessionId, onSessionSelect, onNewSession }:
         {sessions.map((session) => (
           <div
             key={session.id}
-            className={`group relative flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
+            className={`group relative flex items-center p-2 sm:p-3 rounded-lg cursor-pointer transition-colors ${
               currentSessionId === session.id
                 ? 'bg-primary-100 border border-primary-200'
                 : 'hover:bg-gray-100'
             }`}
             onClick={() => onSessionSelect(session.id)}
           >
-            <MessageSquare className="h-4 w-4 mr-3 text-gray-500" />
+            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 mr-2 sm:mr-3 text-gray-500" />
             
             {editingSession === session.id ? (
               <input
@@ -164,12 +167,12 @@ const ChatSessions = ({ user, currentSessionId, onSessionSelect, onNewSession }:
                     updateSessionTitle(session.id, editTitle)
                   }
                 }}
-                className="flex-1 text-sm bg-white border border-gray-300 rounded px-2 py-1"
+                className="flex-1 text-xs sm:text-sm bg-white border border-gray-300 rounded px-2 py-1"
                 autoFocus
               />
             ) : (
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-gray-900 truncate">
+                <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                   {session.title}
                 </div>
                 <div className="text-xs text-gray-500">
@@ -207,9 +210,9 @@ const ChatSessions = ({ user, currentSessionId, onSessionSelect, onNewSession }:
       </div>
 
       {sessions.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          <MessageSquare className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-          <p className="text-sm">No conversations yet</p>
+        <div className="text-center py-6 sm:py-8 text-gray-500">
+          <MessageSquare className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-gray-300" />
+          <p className="text-xs sm:text-sm">No conversations yet</p>
           <p className="text-xs">Start a new chat to begin</p>
         </div>
       )}

@@ -709,12 +709,12 @@ const DataSourcesPage = ({ user }: DataSourcesPageProps) => {
 
       {/* Data Viewer Modal */}
       {showDataViewer && selectedDataSource && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-11/12 h-5/6 max-w-7xl overflow-hidden">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full h-full max-w-7xl max-h-[90vh] flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-shrink-0">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
                   {selectedDataSource.name} - Data Viewer
                 </h2>
                 <p className="text-sm text-gray-500">
@@ -734,21 +734,21 @@ const DataSourcesPage = ({ user }: DataSourcesPageProps) => {
             </div>
 
             {/* Data Table */}
-            <div className="flex-1 overflow-auto p-6">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 min-h-0">
               {csvData.length > 0 ? (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto h-full">
                   <table className="min-w-full text-sm">
-                    <thead className="bg-gray-50 sticky top-0">
+                    <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
                         {Object.keys(csvData[0]).map((header, index) => (
-                          <th key={index} className="text-left p-3 font-medium text-gray-900 border-b">
+                          <th key={index} className="text-left p-3 font-medium text-gray-900 border-b bg-gray-50">
                             {header}
                           </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {csvData.slice(0, 100).map((row, rowIndex) => (
+                      {csvData.map((row, rowIndex) => (
                         <tr key={rowIndex} className="hover:bg-gray-50">
                           {Object.values(row).map((value, colIndex) => (
                             <td key={colIndex} className="p-3 border-b text-gray-700">
@@ -759,11 +759,6 @@ const DataSourcesPage = ({ user }: DataSourcesPageProps) => {
                       ))}
                     </tbody>
                   </table>
-                  {csvData.length > 100 && (
-                    <div className="mt-4 text-center text-sm text-gray-500">
-                      Showing first 100 rows of {csvData.length} total rows
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -774,7 +769,7 @@ const DataSourcesPage = ({ user }: DataSourcesPageProps) => {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
               <div className="text-sm text-gray-600">
                 <span className="font-medium">Data Source:</span> {selectedDataSource.name}
                 <span className="mx-2">•</span>
@@ -784,7 +779,15 @@ const DataSourcesPage = ({ user }: DataSourcesPageProps) => {
               </div>
               <div className="space-x-2">
                 <button
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => {
+                    // Store the selected dataset info in localStorage
+                    localStorage.setItem('selectedDatasetForAnalysis', JSON.stringify({
+                      id: selectedDataSource.id,
+                      name: selectedDataSource.name,
+                      type: selectedDataSource.type
+                    }))
+                    navigate('/dashboard')
+                  }}
                   className="btn-primary"
                 >
                   Analyze with AI
