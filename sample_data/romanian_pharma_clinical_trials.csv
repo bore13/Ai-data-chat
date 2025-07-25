@@ -1,0 +1,16 @@
+Trial_ID,Product_Name,Phase,Start_Date,End_Date,Status,Principal_Investigator,Study_Center,Patient_Count,Success_Rate,Adverse_Events,Compliance_Rate,Regulatory_Approval,Results_Summary
+CT-2022-001,Cardiovit Plus,Phase III,2022-01-15,2023-06-30,Completed,Dr. Ion Popescu,Spitalul Universitar Bucuresti,450,87.5,12,94.2,Approved,Significant improvement in cardiovascular outcomes
+CT-2022-002,NeuroCalm,Phase II,2022-03-20,2023-09-15,Completed,Dr. Maria Ionescu,Spitalul Universitar Cluj,280,82.1,8,91.5,Approved,Positive results in neurological disorder treatment
+CT-2022-003,DiabetCare,Phase III,2022-05-10,2023-12-20,Completed,Dr. Stefan Dumitrescu,Spitalul Universitar Timisoara,520,89.3,15,93.8,Approved,Effective diabetes management with minimal side effects
+CT-2022-004,RespirMax,Phase II,2022-07-05,2023-11-30,Completed,Dr. Ana Vasilescu,Spitalul Universitar Iasi,320,85.7,10,92.1,Approved,Improved respiratory function in test subjects
+CT-2022-005,OncoTreat,Phase I,2022-09-12,2023-08-25,Completed,Dr. Daniel Munteanu,Institutul Oncologic Bucuresti,120,78.5,25,88.9,Approved,Safe for human trials, promising results
+CT-2022-006,VitaminC Plus,Phase IV,2022-11-18,2023-10-15,Completed,Dr. Elena Popescu,Spitalul Universitar Brasov,650,91.2,5,96.5,Approved,Proven efficacy in vitamin supplementation
+CT-2022-007,PainRelief,Phase III,2022-12-22,2023-12-10,Completed,Dr. Ion Vasilescu,Spitalul Universitar Constanta,380,86.8,18,90.2,Approved,Effective pain management with good tolerability
+CT-2022-008,AllergyStop,Phase II,2023-01-15,2023-11-20,Completed,Dr. Maria Dumitrescu,Spitalul Universitar Sibiu,290,84.3,9,93.1,Approved,Reduced allergic reactions in test group
+CT-2022-009,HeartGuard,Phase III,2023-02-08,2024-01-15,Active,Dr. Stefan Ionescu,Spitalul Universitar Craiova,480,89.1,14,94.7,Pending,Promising results in cardiovascular protection
+CT-2022-010,BloodPressure Control,Phase II,2023-03-03,2024-02-25,Active,Dr. Ana Popescu,Spitalul Universitar Galati,310,87.2,11,92.8,Pending,Effective blood pressure regulation
+CT-2022-011,Diabetes Monitor,Phase I,2023-04-20,2024-01-30,Active,Dr. Daniel Vasilescu,Spitalul Universitar Pitesti,150,82.5,8,89.3,Pending,Safe device for diabetes monitoring
+CT-2022-012,Inhaler Pro,Phase II,2023-05-20,2024-03-05,Active,Dr. Elena Dumitrescu,Spitalul Universitar Ploiesti,220,85.9,12,91.6,Pending,Improved inhaler technology
+CT-2022-013,Blood Glucose Strips,Phase IV,2023-06-10,2024-02-10,Active,Dr. Ion Munteanu,Spitalul Universitar Targu Mures,580,93.1,7,95.8,Pending,High accuracy glucose monitoring
+CT-2022-014,Insulin Syringes,Phase III,2023-07-05,2024-04-15,Active,Dr. Maria Popescu,Spitalul Universitar Oradea,420,88.7,16,93.4,Pending,Improved insulin delivery system
+CT-2022-015,Cancer Screening Kit,Phase I,2023-08-20,2024-05-30,Active,Dr. Stefan Vasilescu,Institutul Oncologic Cluj,180,79.2,22,87.1,Pending,Early detection capabilities 

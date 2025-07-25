@@ -29,6 +29,15 @@ const DataSourcesPage = ({ user }: DataSourcesPageProps) => {
   const [sourceName, setSourceName] = useState('')
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
+  const [columnMapping, setColumnMapping] = useState<{
+    [key: string]: { name: string; type: string; required: boolean }
+  }>({})
+  const [showColumnMapping, setShowColumnMapping] = useState(false)
+  const [showFinalPreview, setShowFinalPreview] = useState(false)
+  const [mappedData, setMappedData] = useState<any[]>([])
+  const [selectedDataSource, setSelectedDataSource] = useState<DataSource | null>(null)
+  const [showDataViewer, setShowDataViewer] = useState(false)
+  const [csvData, setCsvData] = useState<any[]>([])
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -65,15 +74,94 @@ const DataSourcesPage = ({ user }: DataSourcesPageProps) => {
       header: true,
       preview: 5,
       complete: (results) => {
+        const headers = results.meta.fields || []
         setCsvPreview({
-          headers: results.meta.fields || [],
+          headers: headers,
           rows: results.data.slice(0, 5) as string[][],
           totalRows: results.data.length
         })
+        
+        // Initialize column mapping
+        const initialMapping: { [key: string]: { name: string; type: string; required: boolean } } = {}
+        headers.forEach(header => {
+          initialMapping[header] = {
+            name: header,
+            type: detectColumnType(results.data, header),
+            required: false
+          }
+        })
+        setColumnMapping(initialMapping)
+        setShowColumnMapping(true)
       },
       error: (error) => {
         setError('Failed to parse CSV file')
         console.error('CSV parsing error:', error)
+      }
+    })
+  }
+
+  const detectColumnType = (data: any[], columnName: string): string => {
+    if (!data || data.length === 0) return 'text'
+    
+    const sampleValues = data.slice(0, 10).map(row => row[columnName]).filter(val => val !== null && val !== undefined)
+    
+    if (sampleValues.length === 0) return 'text'
+    
+    // Check if it's a date
+    const datePattern = /^\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4}/
+    if (sampleValues.some(val => datePattern.test(val))) return 'date'
+    
+    // Check if it's a number
+    if (sampleValues.every(val => !isNaN(Number(val)) && val !== '')) return 'number'
+    
+    return 'text'
+  }
+
+  const handleColumnMappingChange = (originalName: string, field: string, value: string | boolean) => {
+    setColumnMapping(prev => ({
+      ...prev,
+      [originalName]: {
+        ...prev[originalName],
+        [field]: value
+      }
+    }))
+  }
+
+  const processMappedData = () => {
+    if (!csvPreview || !selectedFile) return
+
+    // Parse the full file with mapping
+    Papa.parse(selectedFile, {
+      header: true,
+      complete: (results) => {
+        const processedData = results.data.map((row: any) => {
+          const mappedRow: any = {}
+          Object.keys(columnMapping).forEach(originalName => {
+            const mapping = columnMapping[originalName]
+            const newName = mapping.name
+            let value = row[originalName]
+
+            // Apply data type formatting
+            if (mapping.type === 'number' && value) {
+              value = Number(value)
+            } else if (mapping.type === 'date' && value) {
+              // Ensure consistent date format
+              value = new Date(value).toISOString().split('T')[0]
+            } else if (mapping.type === 'currency' && value) {
+              value = Number(value)
+            }
+
+            mappedRow[newName] = value
+          })
+          return mappedRow
+        })
+
+        setMappedData(processedData)
+        setShowFinalPreview(true)
+      },
+      error: (error) => {
+        setError('Failed to process mapped data')
+        console.error('Data processing error:', error)
       }
     })
   }
@@ -170,6 +258,26 @@ const DataSourcesPage = ({ user }: DataSourcesPageProps) => {
       console.error('Error creating BI connection:', error)
     } finally {
       setUploading(false)
+    }
+  }
+
+  const handleViewData = async (source: DataSource) => {
+    try {
+      // Fetch the CSV data for this source
+      const { data, error } = await supabase
+        .from('uploaded_csv_data')
+        .select('*')
+        .eq('data_source_id', source.id)
+        .single()
+
+      if (error) throw error
+
+      setCsvData(data.data_json || [])
+      setSelectedDataSource(source)
+      setShowDataViewer(true)
+    } catch (error: any) {
+      setError('Failed to load data')
+      console.error('Error loading data:', error)
     }
   }
 
@@ -352,6 +460,151 @@ const DataSourcesPage = ({ user }: DataSourcesPageProps) => {
                     </div>
                   )}
 
+                  {/* Column Mapping Section */}
+                  {showColumnMapping && csvPreview && (
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <h4 className="font-medium text-blue-900 mb-3">Column Mapping & Configuration</h4>
+                      <div className="space-y-3">
+                        {csvPreview.headers.map((header, index) => (
+                          <div key={index} className="flex items-center space-x-4 p-3 bg-white rounded border">
+                            <div className="flex-1">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Column: {header}
+                              </label>
+                              <input
+                                type="text"
+                                value={columnMapping[header]?.name || header}
+                                onChange={(e) => handleColumnMappingChange(header, 'name', e.target.value)}
+                                className="input-field text-sm"
+                                placeholder="Column name"
+                              />
+                            </div>
+                            <div className="w-32">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Type
+                              </label>
+                              <select
+                                value={columnMapping[header]?.type || 'text'}
+                                onChange={(e) => handleColumnMappingChange(header, 'type', e.target.value)}
+                                className="input-field text-sm"
+                              >
+                                <option value="text">Text</option>
+                                <option value="number">Number</option>
+                                <option value="date">Date</option>
+                                <option value="currency">Currency</option>
+                              </select>
+                            </div>
+                            <div className="w-24">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Required
+                              </label>
+                              <input
+                                type="checkbox"
+                                checked={columnMapping[header]?.required || false}
+                                onChange={(e) => handleColumnMappingChange(header, 'required', e.target.checked)}
+                                className="h-4 w-4 text-blue-600"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-4 flex justify-between">
+                        <button
+                          onClick={() => setShowColumnMapping(false)}
+                          className="btn-secondary text-sm"
+                        >
+                          Skip Mapping
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowColumnMapping(false)
+                            processMappedData()
+                          }}
+                          className="btn-primary text-sm"
+                        >
+                          Confirm Mapping
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Final Preview After Mapping */}
+                  {showFinalPreview && mappedData.length > 0 && (
+                    <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                      <h4 className="font-medium text-green-900 mb-3">✅ Data Mapping Complete - Final Preview</h4>
+                      
+                      {/* Mapping Summary */}
+                      <div className="mb-4 p-3 bg-white rounded border">
+                        <h5 className="font-medium text-gray-900 mb-2">Column Mapping Summary:</h5>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          {Object.keys(columnMapping).map(originalName => {
+                            const mapping = columnMapping[originalName]
+                            return (
+                              <div key={originalName} className="flex justify-between">
+                                <span className="text-gray-600">{originalName}</span>
+                                <span className="text-gray-900">→ {mapping.name} ({mapping.type})</span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Processed Data Preview */}
+                      <div className="mb-4">
+                        <h5 className="font-medium text-gray-900 mb-2">Processed Data Preview (First 3 rows):</h5>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full text-sm bg-white rounded border">
+                            <thead>
+                              <tr>
+                                {Object.keys(mappedData[0] || {}).map((header, index) => (
+                                  <th key={index} className="text-left p-2 bg-gray-100 border-b">
+                                    {header}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {mappedData.slice(0, 3).map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                  {Object.values(row).map((value, colIndex) => (
+                                    <td key={colIndex} className="p-2 border-b">
+                                      {value !== null && value !== undefined ? String(value) : ''}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* Upload Confirmation */}
+                      <div className="flex justify-between items-center">
+                        <div className="text-sm text-gray-600">
+                          Total rows: {mappedData.length} | Ready to upload
+                        </div>
+                        <div className="space-x-2">
+                          <button
+                            onClick={() => {
+                              setShowFinalPreview(false)
+                              setShowColumnMapping(true)
+                            }}
+                            className="btn-secondary text-sm"
+                          >
+                            Edit Mapping
+                          </button>
+                          <button
+                            onClick={handleUploadCSV}
+                            disabled={uploading}
+                            className="btn-primary text-sm"
+                          >
+                            {uploading ? 'Uploading...' : 'Upload & Create Data Source'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     onClick={handleUploadCSV}
                     disabled={!selectedFile || !sourceName.trim() || uploading}
@@ -433,7 +686,7 @@ const DataSourcesPage = ({ user }: DataSourcesPageProps) => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => navigate('/dashboard')}
+                      onClick={() => handleViewData(source)}
                       className="btn-secondary flex items-center"
                     >
                       <Eye className="h-4 w-4 mr-1" />
@@ -453,6 +706,104 @@ const DataSourcesPage = ({ user }: DataSourcesPageProps) => {
           )}
         </div>
       </main>
+
+      {/* Data Viewer Modal */}
+      {showDataViewer && selectedDataSource && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-11/12 h-5/6 max-w-7xl overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {selectedDataSource.name} - Data Viewer
+                </h2>
+                <p className="text-sm text-gray-500">
+                  {csvData.length} rows • {Object.keys(csvData[0] || {}).length} columns
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowDataViewer(false)
+                  setSelectedDataSource(null)
+                  setCsvData([])
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Data Table */}
+            <div className="flex-1 overflow-auto p-6">
+              {csvData.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-gray-50 sticky top-0">
+                      <tr>
+                        {Object.keys(csvData[0]).map((header, index) => (
+                          <th key={index} className="text-left p-3 font-medium text-gray-900 border-b">
+                            {header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {csvData.slice(0, 100).map((row, rowIndex) => (
+                        <tr key={rowIndex} className="hover:bg-gray-50">
+                          {Object.values(row).map((value, colIndex) => (
+                            <td key={colIndex} className="p-3 border-b text-gray-700">
+                              {value !== null && value !== undefined ? String(value) : ''}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {csvData.length > 100 && (
+                    <div className="mt-4 text-center text-sm text-gray-500">
+                      Showing first 100 rows of {csvData.length} total rows
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Database className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-gray-500">No data available</p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+              <div className="text-sm text-gray-600">
+                <span className="font-medium">Data Source:</span> {selectedDataSource.name}
+                <span className="mx-2">•</span>
+                <span className="font-medium">Type:</span> {selectedDataSource.type}
+                <span className="mx-2">•</span>
+                <span className="font-medium">Created:</span> {new Date(selectedDataSource.created_at).toLocaleDateString()}
+              </div>
+              <div className="space-x-2">
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="btn-primary"
+                >
+                  Analyze with AI
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDataViewer(false)
+                    setSelectedDataSource(null)
+                    setCsvData([])
+                  }}
+                  className="btn-secondary"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

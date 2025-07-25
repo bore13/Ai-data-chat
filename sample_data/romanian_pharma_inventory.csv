@@ -1,0 +1,16 @@
+Product_ID,Product_Name,Category,Manufacturer,Supplier,Current_Stock,Min_Stock_Level,Max_Stock_Level,Unit_Cost_LEI,Expiry_Date,Storage_Condition,Location,Last_Updated
+PH001,Cardiovit Plus,Prescription,MedPharma RO,Distributie Centrala,1250,200,2000,450,2025-06-15,Controlled Room Temperature,Warehouse A,2024-01-20
+PH002,NeuroCalm,Prescription,MedPharma RO,Distributie Centrala,890,150,1500,600,2025-08-22,Refrigerated,Warehouse B,2024-01-20
+PH003,DiabetCare,Prescription,MedPharma RO,Distributie Centrala,2100,300,2500,600,2025-05-10,Controlled Room Temperature,Warehouse A,2024-01-20
+PH004,RespirMax,Prescription,MedPharma RO,Distributie Centrala,750,100,1200,600,2025-07-18,Controlled Room Temperature,Warehouse A,2024-01-20
+PH005,OncoTreat,Prescription,MedPharma RO,Distributie Centrala,180,50,300,3000,2025-09-30,Refrigerated,Warehouse C,2024-01-20
+PH006,VitaminC Plus,OTC,MedPharma RO,Distributie Centrala,3200,500,4000,25,2025-12-15,Controlled Room Temperature,Warehouse A,2024-01-20
+PH007,PainRelief,OTC,MedPharma RO,Distributie Centrala,1850,300,2500,35,2025-11-20,Controlled Room Temperature,Warehouse A,2024-01-20
+PH008,AllergyStop,OTC,MedPharma RO,Distributie Centrala,950,150,1500,45,2025-10-12,Controlled Room Temperature,Warehouse A,2024-01-20
+PH009,HeartGuard,Prescription,MedPharma RO,Distributie Centrala,680,100,1000,800,2025-06-30,Controlled Room Temperature,Warehouse B,2024-01-20
+PH010,BloodPressure Control,Prescription,MedPharma RO,Distributie Centrala,420,80,800,750,2025-07-25,Controlled Room Temperature,Warehouse B,2024-01-20
+PH011,Diabetes Monitor,Medical Device,MedPharma RO,Distributie Centrala,150,30,200,1200,2026-03-15,Controlled Room Temperature,Warehouse C,2024-01-20
+PH012,Inhaler Pro,Medical Device,MedPharma RO,Distributie Centrala,85,20,120,800,2026-05-20,Controlled Room Temperature,Warehouse C,2024-01-20
+PH013,Blood Glucose Strips,Medical Device,MedPharma RO,Distributie Centrala,2500,400,3000,15,2025-08-10,Controlled Room Temperature,Warehouse A,2024-01-20
+PH014,Insulin Syringes,Medical Device,MedPharma RO,Distributie Centrala,1800,300,2500,8,2025-09-05,Controlled Room Temperature,Warehouse A,2024-01-20
+PH015,Cancer Screening Kit,Medical Device,MedPharma RO,Distributie Centrala,45,10,80,2500,2025-12-30,Refrigerated,Warehouse C,2024-01-20 

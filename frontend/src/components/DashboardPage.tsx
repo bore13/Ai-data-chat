@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { aiService } from '../lib/ai'
 import { User } from '../types'
-import { Send, Database, LogOut, MessageSquare, BarChart3 } from 'lucide-react'
+import { Send, Database, LogOut, MessageSquare, BarChart3, TrendingUp, Lightbulb } from 'lucide-react'
 
 interface DashboardPageProps {
   user: User
@@ -11,6 +12,16 @@ interface DashboardPageProps {
 const DashboardPage = ({ user }: DashboardPageProps) => {
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [messages, setMessages] = useState<Array<{
+    id: string, 
+    text: string, 
+    isUser: boolean, 
+    timestamp: Date,
+    insights?: string[],
+    recommendations?: string[],
+    reformulated_query?: string,
+    metrics?: Record<string, string>
+  }>>([])
   const navigate = useNavigate()
 
   const handleLogout = async () => {
@@ -22,11 +33,46 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
     e.preventDefault()
     if (!message.trim()) return
 
+    const userMessage = {
+      id: Date.now().toString(),
+      text: message,
+      isUser: true,
+      timestamp: new Date()
+    }
+
+    setMessages(prev => [...prev, userMessage])
     setLoading(true)
-    // TODO: Implement AI chat functionality in Phase 2
-    console.log('Sending message:', message)
+
+    try {
+      // Call real AI service
+      const aiResponse = await aiService.analyzeData(user.id, message)
+      
+      const aiMessage = {
+        id: (Date.now() + 1).toString(),
+        text: aiResponse.message,
+        isUser: false,
+        timestamp: new Date(),
+        insights: aiResponse.insights,
+        recommendations: aiResponse.recommendations,
+        reformulated_query: aiResponse.reformulated_query,
+        metrics: aiResponse.metrics
+      }
+
+      setMessages(prev => [...prev, aiMessage])
+    } catch (error) {
+      console.error('AI analysis error:', error)
+      const errorMessage = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm having trouble analyzing your data right now. Please check your API configuration and try again.",
+        isUser: false,
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, errorMessage])
+    } finally {
+      setLoading(false)
+    }
+
     setMessage('')
-    setLoading(false)
   }
 
   return (
@@ -74,11 +120,112 @@ const DashboardPage = ({ user }: DashboardPageProps) => {
               
               {/* Chat Messages Area */}
               <div className="bg-gray-50 rounded-lg p-4 h-96 mb-4 overflow-y-auto">
-                <div className="text-center text-gray-500 mt-32">
-                  <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>Start chatting with your AI Data Analyst</p>
-                  <p className="text-sm">Ask questions about your data to get instant insights</p>
-                </div>
+                {messages.length === 0 ? (
+                  <div className="text-center text-gray-500 mt-32">
+                    <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>Start chatting with your AI Data Analyst</p>
+                    <p className="text-sm">Ask questions about your data to get instant insights</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {messages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                            msg.isUser
+                              ? 'bg-primary-600 text-white'
+                              : 'bg-white border border-gray-200 text-gray-800'
+                          }`}
+                        >
+                          <p className="text-sm">{msg.text}</p>
+                          
+                          {/* Show reformulated query if available */}
+                          {!msg.isUser && msg.reformulated_query && (
+                            <div className="mt-2 pt-2 border-t border-gray-200">
+                              <div className="flex items-center mb-1">
+                                <span className="text-xs font-semibold text-blue-600">🔍 Analysis Query:</span>
+                              </div>
+                              <p className="text-xs text-blue-600 italic">{msg.reformulated_query}</p>
+                            </div>
+                          )}
+
+                          {/* Show metrics if available */}
+                          {!msg.isUser && msg.metrics && Object.keys(msg.metrics).length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <div className="flex items-center mb-2">
+                                <BarChart3 className="h-4 w-4 text-blue-500 mr-2" />
+                                <span className="text-xs font-semibold text-gray-700">Key Metrics:</span>
+                              </div>
+                              <div className="grid grid-cols-1 gap-1">
+                                {Object.entries(msg.metrics).map(([key, value], index) => (
+                                  <div key={index} className="flex justify-between text-xs">
+                                    <span className="text-gray-600 font-medium">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</span>
+                                    <span className="text-gray-800 font-semibold">{value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Show insights if available */}
+                          {!msg.isUser && msg.insights && msg.insights.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <div className="flex items-center mb-2">
+                                <Lightbulb className="h-4 w-4 text-yellow-500 mr-2" />
+                                <span className="text-xs font-semibold text-gray-700">Key Insights:</span>
+                              </div>
+                              <ul className="text-xs text-gray-600 space-y-1">
+                                {msg.insights.map((insight, index) => (
+                                  <li key={index} className="flex items-start">
+                                    <span className="text-yellow-500 mr-1">•</span>
+                                    {insight}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Show recommendations if available */}
+                          {!msg.isUser && msg.recommendations && msg.recommendations.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <div className="flex items-center mb-2">
+                                <TrendingUp className="h-4 w-4 text-green-500 mr-2" />
+                                <span className="text-xs font-semibold text-gray-700">Recommendations:</span>
+                              </div>
+                              <ul className="text-xs text-gray-600 space-y-1">
+                                {msg.recommendations.map((rec, index) => (
+                                  <li key={index} className="flex items-start">
+                                    <span className="text-green-500 mr-1">→</span>
+                                    {rec}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          <p className={`text-xs mt-2 ${
+                            msg.isUser ? 'text-primary-100' : 'text-gray-500'
+                          }`}>
+                            {msg.timestamp.toLocaleTimeString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {loading && (
+                      <div className="flex justify-start">
+                        <div className="bg-white border border-gray-200 text-gray-800 px-4 py-2 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                            <span className="text-sm">AI is thinking...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Message Input */}

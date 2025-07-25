@@ -1,0 +1,26 @@
+Date,Product_Name,Therapeutic_Area,Region,City,Sales_Rep,Units_Sold,Revenue_LEI,Profit_LEI,Market_Share_Percent,Discount_Rate,Insurance_Coverage,Prescription_Count
+2024-01-15,Cardiovit Plus,Cardiovascular,Bucuresti-Ilfov,Bucuresti,Maria Popescu,45,22500,6750,12.5,15,80,38
+2024-01-15,NeuroCalm,Neurology,Bucuresti-Ilfov,Bucuresti,Ion Vasilescu,32,19200,5760,8.2,10,90,28
+2024-01-15,DiabetCare,Endocrinology,Centru,Brasov,Ana Dumitrescu,28,16800,5040,6.8,12,85,25
+2024-01-15,RespirMax,Respiratory,Nord-Vest,Cluj-Napoca,Stefan Munteanu,38,22800,6840,9.1,8,75,32
+2024-01-15,OncoTreat,Oncology,Sud-Est,Constanta,Daniela Ionescu,15,45000,13500,3.2,5,95,12
+2024-01-16,Cardiovit Plus,Cardiovascular,Bucuresti-Ilfov,Bucuresti,Maria Popescu,52,26000,7800,13.1,12,82,44
+2024-01-16,NeuroCalm,Neurology,Bucuresti-Ilfov,Bucuresti,Ion Vasilescu,29,17400,5220,7.8,10,88,26
+2024-01-16,DiabetCare,Endocrinology,Centru,Brasov,Ana Dumitrescu,35,21000,6300,8.5,10,87,30
+2024-01-16,RespirMax,Respiratory,Nord-Vest,Cluj-Napoca,Stefan Munteanu,41,24600,7380,10.2,8,78,35
+2024-01-16,OncoTreat,Oncology,Sud-Est,Constanta,Daniela Ionescu,18,54000,16200,3.8,5,96,15
+2024-01-17,Cardiovit Plus,Cardiovascular,Bucuresti-Ilfov,Bucuresti,Maria Popescu,48,24000,7200,12.8,14,81,40
+2024-01-17,NeuroCalm,Neurology,Bucuresti-Ilfov,Bucuresti,Ion Vasilescu,36,21600,6480,9.5,10,89,31
+2024-01-17,DiabetCare,Endocrinology,Centru,Brasov,Ana Dumitrescu,31,18600,5580,7.2,11,84,27
+2024-01-17,RespirMax,Respiratory,Nord-Vest,Cluj-Napoca,Stefan Munteanu,44,26400,7920,11.1,8,76,38
+2024-01-17,OncoTreat,Oncology,Sud-Est,Constanta,Daniela Ionescu,12,36000,10800,2.9,5,94,10
+2024-01-18,Cardiovit Plus,Cardiovascular,Bucuresti-Ilfov,Bucuresti,Maria Popescu,55,27500,8250,14.2,13,83,47
+2024-01-18,NeuroCalm,Neurology,Bucuresti-Ilfov,Bucuresti,Ion Vasilescu,33,19800,5940,8.1,10,87,29
+2024-01-18,DiabetCare,Endocrinology,Centru,Brasov,Ana Dumitrescu,39,23400,7020,9.8,10,86,33
+2024-01-18,RespirMax,Respiratory,Nord-Vest,Cluj-Napoca,Stefan Munteanu,47,28200,8460,12.3,8,77,40
+2024-01-18,OncoTreat,Oncology,Sud-Est,Constanta,Daniela Ionescu,20,60000,18000,4.1,5,97,17
+2024-01-19,Cardiovit Plus,Cardiovascular,Bucuresti-Ilfov,Bucuresti,Maria Popescu,42,21000,6300,11.8,15,80,36
+2024-01-19,NeuroCalm,Neurology,Bucuresti-Ilfov,Bucuresti,Ion Vasilescu,30,18000,5400,7.9,10,88,26
+2024-01-19,DiabetCare,Endocrinology,Centru,Brasov,Ana Dumitrescu,26,15600,4680,6.5,12,85,22
+2024-01-19,RespirMax,Respiratory,Nord-Vest,Cluj-Napoca,Stefan Munteanu,35,21000,6300,9.2,8,75,30
+2024-01-19,OncoTreat,Oncology,Sud-Est,Constanta,Daniela Ionescu,16,48000,14400,3.5,5,95,13 
